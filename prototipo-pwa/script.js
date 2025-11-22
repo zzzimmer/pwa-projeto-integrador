@@ -1,6 +1,7 @@
 let telaAnterior = 'tela-home'
 let telaAtual = 'tela-home'
 let eventoAtualId = null;
+const corPrimaria = "#003366"
 
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register("./service-worker.js");
@@ -201,4 +202,90 @@ async function convidarPorEmail(email) {
         }
     };
     modal.show();
+}
+
+async function telaInserirDadosEvento(){
+
+    const telaDoEvento = document.getElementById('tela-inserir-dados-evento');
+
+    navegar('tela-inserir-dados-evento')
+
+    //     <div class="d-flex align-items-center justify-content-between mb-4 text-white p-3" style="background-color: ${corPrimaria}; margin: -1.5rem -1.5rem 1.5rem -1.5rem;">
+    //     <i class="bi bi-chevron-left"></i> 
+    //     <h5 class="m-0 fw-normal">Editar</h5>
+    //     <i class="bi bi-three-dots-vertical"></i> 
+    // </div>
+
+    telaDoEvento.innerHTML = `
+
+    <form class="d-flex flex-column gap-2">
+        
+        <div class="mb-2">
+            <h6 class="fw-bold mb-3" style="color: ${corPrimaria};">Nome e Endereço</h6>
+            
+            <div class="mb-3">
+                <input type="text" class="form-control p-3 rounded-3 border-secondary-subtle" 
+                       id="inputNomeEvento" 
+                       placeholder="Digite o nome do evento"> 
+            </div>
+            
+            <div class="mb-3">
+                <input type="text" class="form-control p-3 rounded-3 border-secondary-subtle" 
+                       id="inputEndereco" 
+                       placeholder="Digite o endereço"> 
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <h6 class="fw-bold mb-3" style="color: ${corPrimaria};">Data e horário</h6>
+
+            <div class="mb-3">
+                <label class="small text-muted ms-1 mb-1" for="start">Data do Evento</label>
+                <input type="date" class="form-control p-3 rounded-3 border-secondary-subtle" id="inputData" 
+                       id="start">
+            </div>
+
+            <div class="mb-3">
+                <label class="small text-muted ms-1 mb-1" for="appointment">Horário</label>
+                <input type="time" class="form-control p-3 rounded-3 border-secondary-subtle" id="inputHorario"
+                       id="appointment">
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <button type="button" onclick="criarEvento()" class="btn text-white w-100 p-3 mb-3 rounded-3 fw-bold" 
+                    style="background-color: ${corPrimaria};">
+                Agendar
+            </button>
+            
+            <button type="button" class="btn w-100 p-3 rounded-3 fw-bold bg-white" 
+                    style="border: 2px solid ${corPrimaria}; color: ${corPrimaria};"
+                    onclick="console.log('Cancelar clicado')">
+                Cancelar
+            </button>
+        </div>
+
+    </form>
+    `;
+
+}
+
+async function criarEvento(){
+
+    const url = `http://localhost:8080/usuario/2/eventos`;
+
+    const valName = document.getElementById('inputNomeEvento').value;
+    const valData = document.getElementById('inputData').value;
+    const valHorario = document.getElementById('inputHorario').value;
+    const valLocal = document.getElementById('inputEndereco').value;
+
+    const payload = {
+        name : valName,
+        data : valData,
+        horario : valHorario,
+        local : valLocal,
+    }
+
+    console.log(payload);
+
 }
