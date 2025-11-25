@@ -2,6 +2,7 @@ let telaAnterior = 'tela-home'
 let telaAtual = 'tela-home'
 let eventoAtualId = null;
 const corPrimaria = "#003366"
+const delay = ms => new Promise(res => setTimeout(res,ms));
 
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register("./service-worker.js");
@@ -38,7 +39,7 @@ function voltar() {
 
 async function popularTelaMeusEventos(idUsuario) {
 
-    let idUser; // Você não parece usar essa variável
+    // let idUser;
     let url = `http://localhost:8080/usuario/${idUsuario}/eventos`;
     const telaEventos = document.getElementById("tela-meus-eventos");
 
@@ -118,24 +119,17 @@ async function verListaDeConvidados(id) {
     try {
 
         eventoAtualId = id;
-        // 1. Pegue APENAS o elemento da lista (UL)
         const unorderedList = document.getElementById("detalhes-lista-ul");
 
-        // 2. Navegue para a tela
         navegar("tela-convidados-evento");
 
-        // 3. Coloque o "Carregando..." DENTRO da lista
-        // unorderedList.innerHTML = "<li class='list-group-item'>Carregando...</li>";
 
         const url = `http://localhost:8080/usuario/eventos/${id}`
 
         const response = await axios.get(url);
         const evento = response.data;
         const convidados = evento.convidados;
-        console.log(convidados);
-        console.log(evento);
 
-        // 4. Limpe a lista (removendo o "Carregando...") ANTES do loop
         unorderedList.innerHTML = "";
 
         // 5. Verifique se a lista está vazia
@@ -210,12 +204,6 @@ async function telaInserirDadosEvento(){
 
     navegar('tela-inserir-dados-evento')
 
-    //     <div class="d-flex align-items-center justify-content-between mb-4 text-white p-3" style="background-color: ${corPrimaria}; margin: -1.5rem -1.5rem 1.5rem -1.5rem;">
-    //     <i class="bi bi-chevron-left"></i> 
-    //     <h5 class="m-0 fw-normal">Editar</h5>
-    //     <i class="bi bi-three-dots-vertical"></i> 
-    // </div>
-
     telaDoEvento.innerHTML = `
 
     <form class="d-flex flex-column gap-2">
@@ -270,6 +258,34 @@ async function telaInserirDadosEvento(){
 
 }
 
+function mostrarModalFeedback(tipo, titulo, mensagem) {
+    const modalEl = document.getElementById('modal-feedback');
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+
+    const iconSuccess = document.getElementById('icone-sucesso');
+    const iconError = document.getElementById('icone-erro');
+    const titleEl = document.getElementById('feedback-titulo');
+    const msgEl = document.getElementById('feedback-mensagem');
+
+    titleEl.textContent = titulo;
+    msgEl.textContent = mensagem;
+
+    // configura icones e cores
+    if (tipo === 'sucesso') {
+        iconSuccess.style.display = 'block';
+        iconError.style.display = 'none';
+        titleEl.className = "fw-bold mb-2 text-success";
+    } else {
+        iconSuccess.style.display = 'none';
+        iconError.style.display = 'block';
+        titleEl.className = "fw-bold mb-2 text-danger";
+    }
+
+    modal.show();
+    // retorna a instância para poder fechar depois via código se quiser
+    return modal;
+}
+
 async function criarEvento(){
 
     const url = `http://localhost:8080/usuario/2/eventos`;
@@ -286,6 +302,33 @@ async function criarEvento(){
         local : valLocal,
     }
 
-    console.log(payload);
+    await axios.post(url, payload)
+        .then( async function (response){ // essa função precsa ser async para usar o await delay
+            const modalSucesso = mostrarModalFeedback('sucesso','Sucesso!','Seu evento foi agendado.');
+            await delay(3000);
+
+            modalSucesso.hide();
+
+            navegar('tela-home')
+
+        }) .catch( async function (error){
+            let mensagemError = "Erro inesperado"
+
+            if (error.response){// a requisição saiu e chegou no servidor. Erro foi la
+
+                mensagemError = "Erro na sua requisição. Ajuste os campos";
+
+            } else if (error.request){ // a requisição saiu mas não chegou ao servidor
+                mensagemError = "Sem conexão com o servidor"
+
+            } else { // requisição nem saiu
+                mensagemError = error.message;
+        }
+            const modalErro = mostrarModalFeedback("erro", "Ops!", mensagemError)
+            await delay(3000);
+            modalErro.hide();
+    });
+
+
 
 }
