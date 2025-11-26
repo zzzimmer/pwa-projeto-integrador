@@ -1,8 +1,8 @@
 {
   "$schema": "http://json.schemastore.org/web-manifest",
-  "short_name": "PWA e-commerce",
-  "name": "Minha Loja PWA",
-  "description": "Modelo de e-commerce em Bootstrap, SPA e PWA",
+  "short_name": "PWA QRO-Entrar",
+  "name": "QRO-Entrar",
+  "description": "Modelo aplicativo para gestão de eventos, SPA e PWA",
   "scope": "./",
   "icons": [
     {
