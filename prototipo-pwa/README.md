@@ -1,7 +1,14 @@
-# APP PWA com SPA básico, Bootstrap e Axios
+# PWA: SPA com Bootstrap e Axios
 
-App funcionando: https://ctii-ead-ifsc-fln.github.io/dev-mobile-ctii/maonamassa/pwa/index.html
+Este repositório contém um **PWA (Progressive Web App)** desenvolvido utilizando a tecnica de SPA (Single Page Application).
 
-## Referências
+O projeto foi criado como parte do **Projeto Integrador do Curso Técnico em Desenvolvimento de Sistemas** do IFSC.
 
-App baseado na implementação SPA com Bootstrap
+## 🔗 Integração (Backend)
+
+Este frontend consome uma API Java. O código-fonte do backend pode ser consultado no link abaixo:
+* [Repositório da API (Java)](https://github.com/zzzimmer/api-prototipo)
+
+## 📚 Referências
+
+* Baseado na implementação de SPA com Bootstrap.
