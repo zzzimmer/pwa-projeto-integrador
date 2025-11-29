@@ -38,80 +38,94 @@ function voltar() {
 }
 
 async function popularTelaMeusEventos(idUsuario) {
+    const url = `http://localhost:8080/usuario/${idUsuario}/eventos`;
 
-    // let idUser;
-    let url = `http://localhost:8080/usuario/${idUsuario}/eventos`;
-    const telaEventos = document.getElementById("tela-meus-eventos");
+    // buscar accordion ao inves de toda tela. Tecnica AppShell
+    const accordionWrapper = document.getElementById("accordionMeusEventos");
 
     try {
         navegar('tela-meus-eventos');
-        telaEventos.innerHTML = "<h2>Carregando seus eventos ... :) </h2>";
+
+        // loader enquanto carrega a requisicao
+        accordionWrapper.innerHTML = `
+            <div class="text-center mt-5">
+                <div class="spinner-border text-primary" role="status"></div>
+            </div>`;
 
         const response = await axios.get(url);
         const eventos = response.data;
 
-        // 1. Cria o elemento acordeão FORA do loop
-        telaEventos.innerHTML = `
-            <div class="accordion" id="accordionMeusEventos">
-                </div>
-        `;
+        // remove o loader pos retorno requisicao
+        accordionWrapper.innerHTML = "";
 
-        const accordionWrapper = document.getElementById("accordionMeusEventos");
+        if (eventos.length === 0) {
+            accordionWrapper.innerHTML = "<p class='text-center text-muted mt-4'>Você ainda não criou eventos.</p>";
+            return;
+        }
 
         eventos.forEach(evento => {
-            const accordionItem = document.createElement("div");
-            accordionItem.className = "accordion-item";
-
-            // ID único para este item do acordeão
+            //cria o accordeon de cada evento
             const collapseId = `collapse-${evento.id}`;
+            const headerId = `heading-${evento.id}`;
 
-            accordionItem.innerHTML = `
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
-                            data-bs-target="#${collapseId}" aria-expanded="false" aria-controls="${collapseId}">
+            const itemHTML = `
+            <div class="accordion-item border-0 border-bottom">
+                <h2 class="accordion-header" id="${headerId}">
+                    <button class="accordion-button collapsed shadow-none bg-white text-dark align-items-start" 
+                            type="button" 
+                            data-bs-toggle="collapse" 
+                            data-bs-target="#${collapseId}" 
+                            aria-expanded="false" 
+                            aria-controls="${collapseId}">
                         
-                        <div>
-                            <div>${evento.name}</div>
-                            <small class="text-muted">${evento.data}</small> 
+                        <div class="d-flex flex-column w-100">
+                            <span class="fw-normal mb-1" style="font-size: 1.05rem;">${evento.name}</span>
+                            <span class="text-muted small">${evento.data}</span>
                         </div>
                     </button>
                 </h2>
-                <div id="${collapseId}" class="accordion-collapse collapse" data-bs-parent="#accordionMeusEventos">
-
-                    <div class="accordion-body">        
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <p class="mb-1">${evento.local}</p>
-                                <p class="mb-0">${evento.horario}</p>
+                <div id="${collapseId}" class="accordion-collapse collapse" aria-labelledby="${headerId}" data-bs-parent="#accordionMeusEventos">
+                    <div class="accordion-body pt-0 pb-4">
+                        
+                        <div class="d-flex justify-content-between">
+                            <div class="text-muted small mb-3">
+                                <div class="mb-1">${evento.local}</div>
+                                <div>${evento.horario}</div>
                             </div>
-                            
+
                             <div class="dropdown">
-                                <button class="btn btn-link" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    &#8942; </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#">Editar</a></li>
-                                    <li><a class="dropdown-item" href="#">Excluir</a></li>
+                                <button class="btn btn-link text-dark p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow">
+                                    <li><a class="dropdown-item" href="#">Editar Evento</a></li>
+                                    <li><a class="dropdown-item text-danger" href="#">Cancelar Evento</a></li>
                                 </ul>
                             </div>
                         </div>
 
-                        <div class="d-grid gap-2 mt-3">
-                            <button class="btn btn-outline-primary" type="button" onclick="verListaDeConvidados(${evento.id})">
+                        <div class="d-grid">
+                            <button class="btn btn-outline-primary py-2 fw-normal" 
+                                    style="border-color: #003366; color: #003366;"
+                                    onmouseover="this.style.backgroundColor='#003366'; this.style.color='white';"
+                                    onmouseout="this.style.backgroundColor='transparent'; this.style.color='#003366';"
+                                    type="button" 
+                                    onclick="verListaDeConvidados(${evento.id})">
                                 Lista de Convidados
                             </button>
                         </div>
 
                     </div>
                 </div>
+            </div>
             `;
 
-            accordionWrapper.appendChild(accordionItem);
+            accordionWrapper.innerHTML += itemHTML;
         });
 
-        navegar('tela-meus-eventos');
-        return idUser;
     } catch (error) {
-        console.error("Erro ao carregar seus eventos:", error);
+        // console.error("Erro ao carregar eventos:", error);
+        accordionWrapper.innerHTML = "<p class='text-center text-danger mt-3'>Erro ao buscar eventos.</p>";
     }
 }
 
