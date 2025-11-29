@@ -136,7 +136,65 @@
     </div>
   </div>
 
-  <div id="tela-inserir-dados-evento" class="tela collapse row row-cols-1 row-cols-md-3 g-4">
+  <div id="tela-inserir-dados-evento" class="tela collapse bg-white min-vh-100 p-0">
+
+    <div class="d-flex align-items-center p-3 text-white shadow-sm sticky-top" style="background-color: #003366;">
+      <button class="btn text-white p-0 me-3" onclick="voltar()">
+        <i class="bi bi-chevron-left fs-4"></i>
+      </button>
+      <h5 class="mb-0 flex-grow-1 fw-normal">Criar Evento</h5> <button class="btn text-white p-0">
+      <i class="bi bi-three-dots-vertical fs-5"></i>
+    </button>
+    </div>
+
+    <div class="container mt-4 pb-5">
+      <form class="d-flex flex-column gap-2">
+
+        <div class="mb-2">
+          <h6 class="fw-bold mb-3" style="color: #003366;">Nome e Endereço</h6>
+
+          <div class="mb-3">
+            <input type="text" class="form-control p-3 rounded-2 border-secondary-subtle"
+                   id="inputNomeEvento"
+                   placeholder="Digite o nome do evento">
+          </div>
+
+          <div class="mb-3">
+            <input type="text" class="form-control p-3 rounded-2 border-secondary-subtle"
+                   id="inputEndereco"
+                   placeholder="Endereço (Ex: Rua das Acácias)">
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <h6 class="fw-bold mb-3 mt-2" style="color: #003366;">Data e horário</h6>
+
+          <div class="form-floating mb-3">
+            <input type="date" class="form-control border-secondary-subtle rounded-2" id="inputData" placeholder="Data">
+            <label for="inputData" class="text-muted">Data do Evento</label>
+          </div>
+
+          <div class="form-floating mb-3">
+            <input type="time" class="form-control border-secondary-subtle rounded-2" id="inputHorario" placeholder="Horário">
+            <label for="inputHorario" class="text-muted">Horário</label>
+          </div>
+        </div>
+
+        <div class="mt-2">
+          <button type="button" onclick="criarEvento()" class="btn text-white w-100 py-3 mb-3 rounded-3 fw-bold shadow-sm"
+                  style="background-color: #003366;">
+            Agendar
+          </button>
+
+          <button type="button" class="btn w-100 py-3 rounded-3 fw-bold bg-white"
+                  style="border: 2px solid #003366; color: #003366;"
+                  onclick="voltar()">
+            Cancelar
+          </button>
+        </div>
+
+      </form>
+    </div>
   </div>
 
   <div class="modal fade" id="modal-feedback" tabindex="-1" aria-hidden="true">
