@@ -9,3 +9,7 @@
     box-shadow: none;
     border-color: rgba(0,0,0,.125);
 }
+
+.clickable-card:active {
+    transform: scale(0.98); /* efeito de clique nos cards inicio */
+}
