@@ -117,36 +117,75 @@ async function popularTelaMeusEventos(idUsuario) {
 
 async function verListaDeConvidados(id) {
     try {
-
         eventoAtualId = id;
-        const unorderedList = document.getElementById("detalhes-lista-ul");
-
         navegar("tela-convidados-evento");
 
+        const containerLista = document.getElementById("listaConvidadosAccordion");
+        const tituloEvento = document.getElementById("nome-evento-convidados");
 
-        const url = `http://localhost:8080/usuario/eventos/${id}`
+        // limpa a lista antes de carregar
+        containerLista.innerHTML = `
+            <div class="text-center mt-5 text-muted">
+                <div class="spinner-border text-primary" role="status"></div>
+            </div>`;
+
+        const url = `http://localhost:8080/usuario/eventos/${id}`;
 
         const response = await axios.get(url);
         const evento = response.data;
         const convidados = evento.convidados;
 
-        unorderedList.innerHTML = "";
+        tituloEvento.textContent = `Evento: ${evento.name}`; // nome do evento
+        containerLista.innerHTML = ""; //limpa o loading
 
-        // 5. Verifique se a lista está vazia
-        if (convidados.length === 0) {
-            unorderedList.innerHTML = "<li class='list-group-item'>Nenhum convidado cadastrado para este evento.</li>";
+        if (!convidados || convidados.length === 0) {
+            containerLista.innerHTML = "<p class='text-center text-muted mt-4'>Nenhum convidado ainda.</p>";
             return;
         }
 
-        // 6. Faça o loop corretamente
-        convidados.forEach(convidado => {
-            // Use "+=" para ADICIONAR
-            // Use "convidado" (a string) e não "convidado.emailConvidado"
-            unorderedList.innerHTML += `<li class="list-group-item">${convidado}</li>`;
+        // aqui gera o html do accordeon para convidado
+        convidados.forEach((convidadoEmail, index) => {
+
+            // Criamos IDs únicos baseados no index para o Bootstrap saber quem abre quem
+            const itemId = `guest-item-${index}`;
+
+            // por hora, simular a data
+            const dataFicticia = "dd/MM/yyyy";
+
+            const itemHTML = `
+            <div class="accordion-item border-0 border-bottom">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed shadow-none bg-white text-dark" type="button" 
+                            data-bs-toggle="collapse" data-bs-target="#${itemId}" 
+                            aria-expanded="false">
+                        
+                        <div class="d-flex flex-column text-start">
+                            <span class="fw-medium text-truncate" style="max-width: 250px;">${convidadoEmail}</span>
+                            <small class="text-muted" style="font-size: 0.75rem;">Convidado em: ${dataFicticia}</small>
+                        </div>
+
+                    </button>
+                </h2>
+                <div id="${itemId}" class="accordion-collapse collapse" data-bs-parent="#listaConvidadosAccordion">
+                    <div class="accordion-body text-center bg-light">
+                        <div class="d-grid">
+                            <button class="btn btn-outline-danger bg-white" 
+                                    onclick="console.log('Remover ${convidadoEmail}')">
+                                Remover da Lista
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `;
+
+            containerLista.innerHTML += itemHTML;
         });
 
     } catch (error) {
         console.error("Erro ao carregar detalhes:", error);
+        document.getElementById("listaConvidadosAccordion").innerHTML =
+            "<p class='text-center text-danger mt-3'>Erro ao carregar convidados.</p>";
     }
 }
 
