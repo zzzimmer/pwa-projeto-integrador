@@ -17,7 +17,88 @@
 
 
 <body class="bg-light">
-<div id="tela-home" class="tela collapse show">
+
+<div id="tela-abertura" class="tela collapse show"> <div class="container d-flex flex-column min-vh-100 p-4 bg-white">
+
+  <div class="flex-grow-1 d-flex align-items-center justify-content-center">
+    <div class="text-center">
+      <h2 class="fw-bold" style="color: #003366;">Alguma Logo</h2>
+    </div>
+  </div>
+
+  <div class="mt-auto d-flex flex-column gap-3 mb-4">
+
+    <button class="btn text-white w-100 py-3 rounded-3 fw-bold shadow-sm"
+            style="background-color: #003366;"
+            onclick="navegar('tela-home')"> Login
+    </button>
+
+    <button class="btn text-white w-100 py-3 rounded-3 fw-bold shadow-sm"
+            style="background-color: #1a3352;"
+            onclick="iniciarCadastro()">
+      Criar conta
+    </button>
+
+  </div>
+</div>
+</div>
+
+<div id="tela-criar-conta" class="tela collapse bg-white min-vh-100 p-0">
+
+  <div class="d-flex align-items-center p-3 text-white shadow-sm sticky-top" style="background-color: #003366;">
+    <button class="btn text-white p-0 me-3" onclick="voltar()">
+      <i class="bi bi-chevron-left fs-4"></i>
+    </button>
+    <h5 class="mb-0 flex-grow-1 fw-normal">Criar conta</h5>
+  </div>
+
+  <div class="container mt-4 pb-5">
+    <form id="form-cadastro" class="d-flex flex-column gap-4">
+
+      <div>
+        <h6 class="fw-bold mb-3" style="color: #003366;">Dados</h6>
+        <div class="mb-3">
+          <input type="text" class="form-control p-3 rounded-2 border-secondary-subtle"
+                 id="cad-nome" placeholder="Nome completo" oninput="validarInputsCadastro()">
+          <div class="feedback-erro" id="erro-nome">Campo obrigatório</div>
+        </div>
+      </div>
+
+      <div>
+        <h6 class="fw-bold mb-3" style="color: #003366;">Contatos</h6>
+
+        <div class="mb-3">
+          <input type="email" class="form-control p-3 rounded-2 border-secondary-subtle"
+                 id="cad-email" placeholder="E-mail" oninput="validarInputsCadastro()">
+          <div class="feedback-erro" id="erro-email">Campo obrigatório</div>
+        </div>
+
+        <div class="mb-3">
+          <input type="tel" class="form-control p-3 rounded-2 border-secondary-subtle"
+                 id="cad-telefone" placeholder="Telefone ou celular" oninput="validarInputsCadastro()">
+          <div class="feedback-erro" id="erro-telefone">Campo obrigatório</div>
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <button type="button" id="btn-concluir-cadastro"
+                class="btn btn-secondary-disabled w-100 py-3 mb-3 rounded-2 fw-bold"
+                onclick="finalizarCadastro()">
+          Concluir cadastro
+        </button>
+
+        <button type="button" class="btn w-100 py-3 rounded-2 fw-bold bg-white"
+                style="border: 2px solid #003366; color: #003366;"
+                onclick="voltar()">
+          Cancelar
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<div id="tela-home" class="tela collapse ">
 
   <div class="container d-flex flex-column justify-content-start min-vh-100 pb-5 px-4 pt-5">
 
@@ -70,7 +151,7 @@
     <div id="tela-meus-eventos" class="tela collapse bg-white min-vh-100 p-0">
 
       <div class="d-flex align-items-center p-3 text-white shadow-sm sticky-top" style="background-color: #003366;">
-        <button class="btn text-white p-0 me-3" onclick="voltar()">
+        <button class="btn text-white p-0 me-3" onclick="navegar('tela-home')">
           <i class="bi bi-chevron-left fs-4"></i>
         </button>
         <h5 class="mb-0 flex-grow-1 fw-normal">Eventos Criados</h5>
@@ -140,7 +221,7 @@
   <div id="tela-inserir-dados-evento" class="tela collapse bg-white min-vh-100 p-0">
 
     <div class="d-flex align-items-center p-3 text-white shadow-sm sticky-top" style="background-color: #003366;">
-      <button class="btn text-white p-0 me-3" onclick="voltar()">
+      <button class="btn text-white p-0 me-3" onclick="navegar('tela-home')">
         <i class="bi bi-chevron-left fs-4"></i>
       </button>
       <h5 class="mb-0 flex-grow-1 fw-normal">Criar Evento</h5> <button class="btn text-white p-0">
