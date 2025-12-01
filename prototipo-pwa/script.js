@@ -147,24 +147,24 @@ async function verListaDeConvidados(id) {
 
         const response = await axios.get(url);
         const evento = response.data;
-        const convidados = evento.convidados;
+        const chaveValorEmailData = evento.mailDoConvidado_dataConvite;
+        // console.log(chaveValorEmailData);
 
         tituloEvento.textContent = `Evento: ${evento.name}`; // nome do evento
         containerLista.innerHTML = ""; //limpa o loading
 
-        if (!convidados || convidados.length === 0) {
+        if (!chaveValorEmailData || Object.keys(chaveValorEmailData).length === 0) {
             containerLista.innerHTML = "<p class='text-center text-muted mt-4'>Nenhum convidado ainda.</p>";
             return;
         }
+        // console.log(Object.keys(chaveValorEmailData));
+        const listaConvidados = Object.entries(chaveValorEmailData);
+        // console.log(listaConvidados);
 
-        // aqui gera o html do accordeon para convidado
-        convidados.forEach((convidadoEmail, index) => {
+        listaConvidados.forEach(([convidadoEmail,data],index) => {
 
-            // Criamos IDs únicos baseados no index para o Bootstrap saber quem abre quem
             const itemId = `guest-item-${index}`;
 
-            // por hora, simular a data
-            const dataFicticia = "dd/MM/yyyy";
 
             const itemHTML = `
             <div class="accordion-item border-0 border-bottom">
@@ -175,7 +175,7 @@ async function verListaDeConvidados(id) {
                         
                         <div class="d-flex flex-column text-start">
                             <span class="fw-medium text-truncate" style="max-width: 250px;">${convidadoEmail}</span>
-                            <small class="text-muted" style="font-size: 0.75rem;">Convidado em: ${dataFicticia}</small>
+                            <small class="text-muted" style="font-size: 0.75rem;">Convidado em: ${data}</small>
                         </div>
 
                     </button>
@@ -194,7 +194,7 @@ async function verListaDeConvidados(id) {
             `;
 
             containerLista.innerHTML += itemHTML;
-        });
+        })
 
     } catch (error) {
         console.error("Erro ao carregar detalhes:", error);
