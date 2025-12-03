@@ -1,3 +1,5 @@
+const API_URL = "http://localhost:8080";
+
 let telaAnterior = 'tela-home'
 let telaAtual = 'tela-home'
 let eventoAtualId = null;
@@ -37,8 +39,8 @@ function voltar() {
     navegar(telaAnterior)
 }
 
-async function popularTelaMeusEventos(idUsuario) {
-    const url = `http://localhost:8080/usuario/${idUsuario}/eventos`;
+async function popularTelaMeusEventos() {
+    const url = `${API_URL}/usuario/meus-eventos`;
 
     // buscar accordion ao inves de toda tela. Tecnica AppShell
     const accordionWrapper = document.getElementById("accordionMeusEventos");
@@ -119,7 +121,6 @@ async function popularTelaMeusEventos(idUsuario) {
                 </div>
             </div>
             `;
-
             accordionWrapper.innerHTML += itemHTML;
         });
 
@@ -291,7 +292,7 @@ function mostrarModalFeedback(tipo, titulo, mensagem) {
 
 async function criarEvento(){
 
-    const url = `http://localhost:8080/usuario/2/eventos`;
+    const url = `${API_URL}/usuario/criar-evento`;
 
     const valName = document.getElementById('inputNomeEvento').value;
     const valData = document.getElementById('inputData').value;
@@ -331,7 +332,93 @@ async function criarEvento(){
             await delay(3000);
             modalErro.hide();
     });
-
-
-
 }
+
+axios.interceptors.request.use(function (config){
+    const token = localStorage.getItem('token');
+    if (token){
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+}, function (error) {
+    return Promise.reject(error);
+});
+
+//para lidar com tokens expirados
+axios.interceptors.response.use( response => response, error => {
+    if (error.response && (error.response.status === 403 || error.response.status === 401)){
+        alert("Sessão expirada, Faça login novamente");
+        localStorage.removeItem('token');
+        navegar('tela-abertura');
+    }
+    return Promise.reject(error);
+});
+
+async function realizarLogin(){
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-senha').value;
+
+    // console.log(email, password)
+
+    if (!email || !password) {
+        alert("Preencha e-mail e senha");
+        return;
+    }
+    try {
+        const response = await axios.post(`${API_URL}/auth/login`, {
+            email : email,
+            password : password
+        });
+
+        //salvar token vindo da requisição
+        const token = response.data.token;
+        //ou name, tem que ver A ou O
+        const nome = response.data.nome;
+
+        localStorage.setItem('token', token);
+        localStorage.setItem('usuarioNome', nome);
+
+        document.getElementById('login-email').value="";
+        document.getElementById('login-senha').value="";
+
+        navegar('tela-home');
+    } catch (error) {
+        console.error(error);
+        alert("Falha no login. Verifique e-mail e senha.");
+    }
+}
+
+async function realizarCadastro() {
+    const nome = document.getElementById('cad-nome').value;
+    const email = document.getElementById('cad-email').value;
+    // const telefone = document.getElementById('cad-telefone').value;
+    const password = document.getElementById('cad-senha').value;
+
+    if (!nome || !email || !password) {
+        alert("Preencha todos os campos obrigatórios");
+        return;
+    }
+
+    try {
+        const payload = {
+            name: nome,
+            email: email,
+            password: password
+        };
+
+        const response = await axios.post(`${API_URL}/auth/register`, payload);
+
+        // pegar o token na resposta, ja que a api fornece
+        const token = response.data.token;
+        localStorage.setItem('token', token);
+        localStorage.setItem('usuarioNome', response.data.name);
+
+        alert("Conta criada com sucesso!");
+        navegar('tela-home');
+
+    } catch (error) {
+        console.error(error);
+        alert("Erro ao criar conta. Tente outro e-mail.");
+    }
+}
+
