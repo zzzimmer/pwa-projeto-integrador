@@ -1,11 +1,3 @@
-const API_URL = "http://localhost:8080";
-
-let telaAnterior = 'tela-home'
-let telaAtual = 'tela-home'
-let eventoAtualId = null;
-const corPrimaria = "#003366"
-const delay = ms => new Promise(res => setTimeout(res,ms));
-
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register("./service-worker.js");
 }
@@ -21,6 +13,17 @@ window.addEventListener('beforeinstallprompt', function (installPrompt) {
 function installApp() {
     pedidoInstalacao.prompt();
 }
+
+
+const API_URL = "http://localhost:8080";
+
+let telaAnterior = 'tela-home'
+let telaAtual = 'tela-home'
+let eventoAtualId = null;
+const corPrimaria = "#003366"
+const delay = ms => new Promise(res => setTimeout(res,ms));
+
+
 
 
 function navegar(destino) {
@@ -56,6 +59,8 @@ async function popularTelaMeusEventos() {
 
         const response = await axios.get(url);
         const eventos = response.data;
+
+        // console.log(eventos);
 
         // remove o loader pos retorno requisicao
         accordionWrapper.innerHTML = "";
@@ -250,6 +255,7 @@ async function convidarPorEmail(email) {
         }
     };
     modal.show();
+
 }
 
 function telaInserirDadosEvento() {
@@ -373,7 +379,7 @@ async function realizarLogin(){
         //salvar token vindo da requisição
         const token = response.data.token;
         //ou name, tem que ver A ou O
-        const nome = response.data.nome;
+        const nome = response.data.name;
 
         localStorage.setItem('token', token);
         localStorage.setItem('usuarioNome', nome);
@@ -420,5 +426,16 @@ async function realizarCadastro() {
         console.error(error);
         alert("Erro ao criar conta. Tente outro e-mail.");
     }
+}
+
+function sair(){
+
+    localStorage.removeItem('token');
+    localStorage.removeItem('usuarioNome');
+
+    document.getElementById("accordionMeusEventos").innerHTML = "";
+    document.getElementById("listaConvidadosAccordion").innerHTML = "";
+
+    navegar('tela-abertura')
 }
 
