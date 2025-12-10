@@ -4,7 +4,7 @@
  * isso garante que a aplicação será atualizada nos clientes onde já exista
  * um cache salvo
  */
-const version = 1
+const version = 2
 const cachename = 'app-cache-v'+version
 
 /**
@@ -40,21 +40,54 @@ const arquivos = [
    * Caso não seja possivel retorna o match(index) da catch
    * Está página pode ser tratada e retornar uma mensagem de erro/offline
    */
-  self.addEventListener('fetch', function(event) {
-    event.respondWith(caches.match(event.request).then(function(response) {
-      if (response !== undefined) {
-        return response;
-      } else {
-        return fetch(event.request).then(function (response) {
-          let responseClone = response.clone();
+  // self.addEventListener('fetch', function(event) {
+  //   event.respondWith(caches.match(event.request).then(function(response) {
+  //     if (response !== undefined) {
+  //       return response;
+  //     } else {
+  //       return fetch(event.request).then(function (response) {
+  //         let responseClone = response.clone();
           
-          caches.open(cachename).then(function (cache) {
-            cache.put(event.request, responseClone);
-          });
-          return response;
-        }).catch(function () {
-          return caches.match('./index.html');
-        });
+  //         caches.open(cachename).then(function (cache) {
+  //           cache.put(event.request, responseClone);
+  //         });
+  //         return response;
+  //       }).catch(function () {
+  //         return caches.match('./index.html');
+  //       });
+  //     }
+  //   }));
+  // });
+
+  /**
+   * Tava tendo uns problemas com Token, precisei investigar isso.
+   * Descobri que pro navegador tudo é requisição, tanto mpuxar dados da API quanto pegar os elementos de HTML. Então o Gemini me mostrou que da pra implementar um "filtro" das requisições do navegador
+   */
+
+  self.addEventListener('fetch', function(event) {
+  // se a URL for da API (contém o prexifo de localhost:8080) não usa cache
+  if (event.request.url.includes('localhost:8080')) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  // o else, no caso arquivos estáticos (html, css, js e imagens), continua priorizando o cache
+  event.respondWith(
+    caches.match(event.request).then(function(response) {
+      if (response) {
+        return response;
       }
-    }));
-  });
+      return fetch(event.request).then(function(response) {
+        // Não cacheia respostas inválidas
+        if(!response || response.status !== 200 || response.type !== 'basic') {
+          return response;
+        }
+        let responseClone = response.clone();
+        caches.open(cachename).then(function(cache) {
+          cache.put(event.request, responseClone);
+        });
+        return response;
+      });
+    })
+  );
+});
