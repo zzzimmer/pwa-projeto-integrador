@@ -42,34 +42,47 @@ function voltar() {
     navegar(telaAnterior)
 }
 
-async function popularTelaMeusEventos() {
-    const url = `${API_URL}/usuario/meus-eventos`;
 
-    // buscar accordion ao inves de toda tela. Tecnica AppShell
-    const accordionWrapper = document.getElementById("accordionMeusEventos");
+async function carregarTelaMeusEventos(){
 
-    try {
-        navegar('tela-meus-eventos');
+    const accordionWreapper = document
+        .getElementById("accordionMeusEventos");
 
-        // loader enquanto carrega a requisicao
-        accordionWrapper.innerHTML = `
+    navegar('tela-meus-eventos');
+    accordionWreapper.innerHTML = `
+        <div class="text-center mt-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted small">Buscando seus eventos...</p>
+        </div>`;
+
+    try{
+
+        const eventos = await buscaEventosAPI();
+
+        renderizarTelaMeusEventos(eventos, accordionWreapper);
+    } catch (error){
+        accordionWreapper.innerHTML = `
             <div class="text-center mt-5">
-                <div class="spinner-border text-primary" role="status"></div>
+                <p class="text-danger">Erro ao carregar eventos.</p>
+                <button class="btn btn-sm btn-outline-secondary" onclick="carregarTelaMeusEventos()">Tentar novamente</button>
             </div>`;
+    }
+}
 
-        const response = await axios.get(url);
-        const eventos = response.data;
+async function buscaEventosAPI(){
+    const url = `${API_URL}/usuario/meus-eventos`;
+    const response = await axios.get(url);
+    return response.data;
+}
 
-        // console.log(eventos);
+async function renderizarTelaMeusEventos(eventos, container){
 
-        // remove o loader pos retorno requisicao
-        accordionWrapper.innerHTML = "";
+    container.innerHTML = "";
 
-        if (eventos.length === 0) {
-            accordionWrapper.innerHTML = "<p class='text-center text-muted mt-4'>Você ainda não criou eventos.</p>";
-            return;
-        }
-
+    if (!eventos || eventos.length ==0){
+        container.innerHTML = "<p class='text-center text-muted mt-4'>Você ainda não criou eventos.</p>";
+        return;
+    } else {
         eventos.forEach(evento => {
             //cria o accordeon de cada evento
             const collapseId = `collapse-${evento.id}`;
@@ -126,14 +139,12 @@ async function popularTelaMeusEventos() {
                 </div>
             </div>
             `;
-            accordionWrapper.innerHTML += itemHTML;
+            container.innerHTML += itemHTML;
         });
-
-    } catch (error) {
-        // console.error("Erro ao carregar eventos:", error);
-        accordionWrapper.innerHTML = "<p class='text-center text-danger mt-3'>Erro ao buscar eventos.</p>";
     }
 }
+
+
 
 async function verListaDeConvidados(id) {
     try {
