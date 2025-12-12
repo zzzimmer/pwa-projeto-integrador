@@ -359,7 +359,7 @@ async function buscarUmEvento(id){
 async function renderizarTelaConvidadosEvento(evento, container){
 
     const chaveValorEmailData = evento.mailDoConvidado_dataConvite;
-    let tituloEvento;
+    const tituloEvento = "";
     tituloEvento.textContent = `Evento: ${evento.name}`;
 
     if (!chaveValorEmailData || Object.keys(chaveValorEmailData).length === 0) {
