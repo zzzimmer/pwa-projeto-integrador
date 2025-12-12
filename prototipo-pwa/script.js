@@ -1,47 +1,9 @@
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register("./service-worker.js");
-}
-
-var pedidoInstalacao;
-window.addEventListener('beforeinstallprompt', function (installPrompt) {
-    if (installPrompt) {
-        document.getElementById("installAppBt").classList.add('show')
-        pedidoInstalacao = installPrompt
-    }
-});
-
-function installApp() {
-    pedidoInstalacao.prompt();
-}
-
+import {navegar} from "./funcoesAuxiliares.js";
 
 const API_URL = "http://localhost:8080";
-
-let telaAnterior = 'tela-home'
-let telaAtual = 'tela-home'
 let eventoAtualId = null;
 const corPrimaria = "#003366"
 const delay = ms => new Promise(res => setTimeout(res,ms));
-
-
-
-
-function navegar(destino) {
-    let telas = document.getElementsByClassName('tela')
-    Array.from(telas).forEach(element => {
-        element.classList.remove('show')
-        element.classList.add('collapse')
-    });
-    document.getElementById(destino).classList.remove('collapse')
-    document.getElementById(destino).classList.add('show')
-    telaAnterior = telaAtual
-    telaAtual = destino
-}
-
-function voltar() {
-    navegar(telaAnterior)
-}
-
 
 async function carregarTelaMeusEventos(){
 
@@ -76,7 +38,6 @@ async function buscaEventosAPI(){
 }
 
 async function renderizarTelaMeusEventos(eventos, container){
-
     container.innerHTML = "";
 
     if (!eventos || eventos.length ==0){
@@ -130,7 +91,7 @@ async function renderizarTelaMeusEventos(eventos, container){
                                     onmouseover="this.style.backgroundColor='#003366'; this.style.color='white';"
                                     onmouseout="this.style.backgroundColor='transparent'; this.style.color='#003366';"
                                     type="button" 
-                                    onclick="verListaDeConvidados(${evento.id})">
+                                    onclick="carregarTelaListaConvidados(${evento.id})">
                                 Lista de Convidados
                             </button>
                         </div>
@@ -145,85 +106,8 @@ async function renderizarTelaMeusEventos(eventos, container){
 }
 
 
-
-async function verListaDeConvidados(id) {
-    try {
-        eventoAtualId = id;
-        navegar("tela-convidados-evento");
-
-        const containerLista = document.getElementById("listaConvidadosAccordion");
-        const tituloEvento = document.getElementById("nome-evento-convidados");
-
-        // limpa a lista antes de carregar
-        containerLista.innerHTML = `
-            <div class="text-center mt-5 text-muted">
-                <div class="spinner-border text-primary" role="status"></div>
-            </div>`;
-
-        const url = `http://localhost:8080/usuario/eventos/${id}`;
-
-        const response = await axios.get(url);
-        const evento = response.data;
-        const chaveValorEmailData = evento.mailDoConvidado_dataConvite;
-        // console.log(chaveValorEmailData);
-
-        tituloEvento.textContent = `Evento: ${evento.name}`; // nome do evento
-        containerLista.innerHTML = ""; //limpa o loading
-
-        if (!chaveValorEmailData || Object.keys(chaveValorEmailData).length === 0) {
-            containerLista.innerHTML = "<p class='text-center text-muted mt-4'>Nenhum convidado ainda.</p>";
-            return;
-        }
-        // console.log(Object.keys(chaveValorEmailData));
-        const listaConvidados = Object.entries(chaveValorEmailData);
-        // console.log(listaConvidados);
-
-        listaConvidados.forEach(([convidadoEmail,data],index) => {
-
-            const itemId = `guest-item-${index}`;
-
-
-            const itemHTML = `
-            <div class="accordion-item border-0 border-bottom">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed shadow-none bg-white text-dark" type="button" 
-                            data-bs-toggle="collapse" data-bs-target="#${itemId}" 
-                            aria-expanded="false">
-                        
-                        <div class="d-flex flex-column text-start">
-                            <span class="fw-medium text-truncate" style="max-width: 250px;">${convidadoEmail}</span>
-                            <small class="text-muted" style="font-size: 0.75rem;">Convidado em: ${data}</small>
-                        </div>
-
-                    </button>
-                </h2>
-                <div id="${itemId}" class="accordion-collapse collapse" data-bs-parent="#listaConvidadosAccordion">
-                    <div class="accordion-body text-center bg-light">
-                        <div class="d-grid">
-                            <button class="btn btn-outline-danger bg-white" 
-                                    onclick="console.log('Remover ${convidadoEmail}')">
-                                Remover da Lista
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            `;
-
-            containerLista.innerHTML += itemHTML;
-        })
-
-    } catch (error) {
-        console.error("Erro ao carregar detalhes:", error);
-        document.getElementById("listaConvidadosAccordion").innerHTML =
-            "<p class='text-center text-danger mt-3'>Erro ao carregar convidados.</p>";
-    }
-}
-
-
 async function convidarPorEmail(email) {
     //primeiro a função configura o modal com os valores do convidado-email, texto pergunta
-
     //verifica se é não nulo e retira os espaços em branco
     const valor = (email || '').trim();
 
@@ -439,14 +323,91 @@ async function realizarCadastro() {
     }
 }
 
-function sair(){
+async function carregarTelaListaConvidados(id){
 
-    localStorage.removeItem('token');
-    localStorage.removeItem('usuarioNome');
+    eventoAtualId = id;
+    navegar("tela-convidados-evento");
 
-    document.getElementById("accordionMeusEventos").innerHTML = "";
-    document.getElementById("listaConvidadosAccordion").innerHTML = "";
+    const containerLista = document.getElementById("listaConvidadosAccordion");
+    const tituloEvento = document.getElementById("nome-evento-convidados");
 
-    navegar('tela-abertura')
+    containerLista.innerHTML = `
+            <div class="text-center mt-5 text-muted">
+                <div class="spinner-border text-primary" role="status"></div>
+            </div>`;
+
+    try {
+        const evento = await buscarUmEvento(id);
+        tituloEvento.textContent = `Evento: ${evento.name}`;
+
+        renderizarTelaConvidadosEvento(evento, containerLista);
+    } catch (error){
+        containerLista.innerHTML = `
+            <div class="text-center mt-5">
+                <p class="text-danger">Erro ao carregar lista de convidados.</p>
+                <button class="btn btn-sm btn-outline-secondary" onclick="carregarTelaListaConvidados(id)">Tentar novamente</button>
+            </div>`;
+    }
 }
 
+async function buscarUmEvento(id){
+    const url = `http://localhost:8080/usuario/eventos/${id}`;
+    const response = await axios.get(url);
+    return response.data;
+}
+
+async function renderizarTelaConvidadosEvento(evento, container){
+
+    const chaveValorEmailData = evento.mailDoConvidado_dataConvite;
+    let tituloEvento;
+    tituloEvento.textContent = `Evento: ${evento.name}`;
+
+    if (!chaveValorEmailData || Object.keys(chaveValorEmailData).length === 0) {
+        containerLista.innerHTML = "<p class='text-center text-muted mt-4'>Nenhum convidado ainda.</p>";
+        return;
+    }
+
+    const listaConvidados = Object.entries(chaveValorEmailData);
+
+    listaConvidados.forEach(([convidadoEmail,data],index) => {
+
+        const itemId = `guest-item-${index}`;
+        const itemHTML = `
+            <div class="accordion-item border-0 border-bottom">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed shadow-none bg-white text-dark" type="button" 
+                            data-bs-toggle="collapse" data-bs-target="#${itemId}" 
+                            aria-expanded="false">
+                        
+                        <div class="d-flex flex-column text-start">
+                            <span class="fw-medium text-truncate" style="max-width: 250px;">${convidadoEmail}</span>
+                            <small class="text-muted" style="font-size: 0.75rem;">Convidado em: ${data}</small>
+                        </div>
+
+                    </button>
+                </h2>
+                <div id="${itemId}" class="accordion-collapse collapse" data-bs-parent="#listaConvidadosAccordion">
+                    <div class="accordion-body text-center bg-light">
+                        <div class="d-grid">
+                            <button class="btn btn-outline-danger bg-white" 
+                                    onclick="console.log('Remover ${convidadoEmail}')">
+                                Remover da Lista
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `;
+
+        container.innerHTML += itemHTML;
+    })
+}
+//todo essa penca de coisa tem sair em algum momento.
+window.realizarLogin = realizarLogin;
+window.realizarCadastro = realizarCadastro;
+window.carregarTelaMeusEventos = carregarTelaMeusEventos;
+window.carregarTelaListaConvidados = carregarTelaListaConvidados;
+window.criarEvento = criarEvento;
+window.telaInserirDadosEvento = telaInserirDadosEvento;
+window.convidarPorEmail = convidarPorEmail;
+window.mostrarModalFeedback = mostrarModalFeedback;
