@@ -324,12 +324,11 @@ async function realizarCadastro() {
 }
 
 async function carregarTelaListaConvidados(id){
-
     eventoAtualId = id;
     navegar("tela-convidados-evento");
 
     const containerLista = document.getElementById("listaConvidadosAccordion");
-    const tituloEvento = document.getElementById("nome-evento-convidados");
+    const tituloEvento = document.getElementById("nome-evento-convidados"); // 
 
     containerLista.innerHTML = `
             <div class="text-center mt-5 text-muted">
@@ -338,52 +337,51 @@ async function carregarTelaListaConvidados(id){
 
     try {
         const evento = await buscarUmEvento(id);
+        
+        
         tituloEvento.textContent = `Evento: ${evento.name}`;
 
         renderizarTelaConvidadosEvento(evento, containerLista);
     } catch (error){
+        // console.error(error);
         containerLista.innerHTML = `
             <div class="text-center mt-5">
                 <p class="text-danger">Erro ao carregar lista de convidados.</p>
-                <button class="btn btn-sm btn-outline-secondary" onclick="carregarTelaListaConvidados(id)">Tentar novamente</button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="carregarTelaListaConvidados(${id})">Tentar novamente</button>
             </div>`;
     }
 }
 
-async function buscarUmEvento(id){
-    const url = `http://localhost:8080/usuario/eventos/${id}`;
-    const response = await axios.get(url);
-    return response.data;
-}
-
 async function renderizarTelaConvidadosEvento(evento, container){
+    
 
     const chaveValorEmailData = evento.mailDoConvidado_dataConvite;
-    const tituloEvento = "";
-    tituloEvento.textContent = `Evento: ${evento.name}`;
+
 
     if (!chaveValorEmailData || Object.keys(chaveValorEmailData).length === 0) {
-        containerLista.innerHTML = "<p class='text-center text-muted mt-4'>Nenhum convidado ainda.</p>";
+
+        container.innerHTML = "<p class='text-center text-muted mt-4'>Nenhum convidado ainda.</p>";
         return;
     }
 
+    // Se chegou aqui, tem convidados. Limpa o spinner antes de desenhar.
+    container.innerHTML = ""; 
+
     const listaConvidados = Object.entries(chaveValorEmailData);
 
-    listaConvidados.forEach(([convidadoEmail,data],index) => {
-
+    listaConvidados.forEach(([convidadoEmail, data], index) => {
         const itemId = `guest-item-${index}`;
+        // Lógica de template string mantida, está correta
         const itemHTML = `
             <div class="accordion-item border-0 border-bottom">
                 <h2 class="accordion-header">
                     <button class="accordion-button collapsed shadow-none bg-white text-dark" type="button" 
                             data-bs-toggle="collapse" data-bs-target="#${itemId}" 
                             aria-expanded="false">
-                        
                         <div class="d-flex flex-column text-start">
                             <span class="fw-medium text-truncate" style="max-width: 250px;">${convidadoEmail}</span>
                             <small class="text-muted" style="font-size: 0.75rem;">Convidado em: ${data}</small>
                         </div>
-
                     </button>
                 </h2>
                 <div id="${itemId}" class="accordion-collapse collapse" data-bs-parent="#listaConvidadosAccordion">
@@ -398,9 +396,14 @@ async function renderizarTelaConvidadosEvento(evento, container){
                 </div>
             </div>
             `;
-
         container.innerHTML += itemHTML;
-    })
+    });
+}
+
+async function buscarUmEvento(id){
+    const url = `${API_URL}/usuario/eventos/${id}`;
+    const response = await axios.get(url);
+    return response.data;
 }
 //todo essa penca de coisa tem sair em algum momento.
 window.realizarLogin = realizarLogin;

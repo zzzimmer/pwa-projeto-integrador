@@ -46,4 +46,5 @@ function sair(){
 
 window.navegar = navegar;
 window.sair = sair;
+window.voltar = voltar;
 
